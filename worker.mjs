@@ -79,7 +79,7 @@ async function request(env,access,path,params={},method='GET',body,contentType='
   const url=new URL(path,API);for(const [k,v]of Object.entries(params))url.searchParams.set(k,v);
   const r=await fetch(url,{method,headers:{Authorization:'Bearer '+access,...(body?{'Content-Type':contentType}:{})},body:body===undefined?undefined:contentType==='application/json'?JSON.stringify(body):body,signal:AbortSignal.timeout(25000)});
   const text=await bounded(r);
-  if(!r.ok){let reason='';try{reason=JSON.parse(text).error?.errors?.[0]?.reason||'';}catch{}throw Error('youtube_'+r.status+'_'+reason);}
+  if(!r.ok){let reason='',detail='';try{const e=JSON.parse(text).error||{};reason=e.errors?.[0]?.reason||'';detail=e.errors?.[0]?.message||e.message||'';}catch{}throw Error('youtube_'+r.status+'_'+reason+'_'+method+'_'+new URL(path,API).pathname.split('/').slice(-2).join('/')+'_'+detail.replace(/[^a-zA-Z0-9 _.,:-]/g,'').slice(0,120));}
   return contentType==='application/json'?JSON.parse(text):text;
 }
 async function uploadCaption(env,access,videoId,language,srt,ledger) {
