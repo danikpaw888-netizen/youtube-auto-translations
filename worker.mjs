@@ -1,5 +1,5 @@
 // Disabled until Google OAuth secrets and ENABLED=true are configured.
-const BASE = ['az','sq','en','ar','hy','be','bg','hu','vi','el','ka','he','id','es','it','kk','ky','ko','de','nl','pl','pt','th','tr','tk','uz','uk','fr','hi','ja'];
+const BASE = ['az','sq','en','ar','hy','be','bg','hu','vi','el','ka','iw','id','es','it','kk','ky','ko','de','nl','pl','pt','th','tr','tk','uz','uk','fr','hi','ja'];
 const REGIONS = {en:['AU','GB','IN','IE','CA','US'],es:['ES','419','MX','US'],de:['AT','DE','CH'],nl:['BE','NL'],pt:['BR','PT'],fr:['BE','CA','FR','CH']};
 // Hindi is an existing extra in the user's videos; the reference has 29 base
 // languages + 21 regional variants = 50. Captions use 30 base languages.
@@ -113,7 +113,7 @@ async function tick(env) {
     const video=videos.items?.[0];
     if(!video||video.snippet.channelId!==env.CHANNEL_ID)throw Error('video_not_owned');
     if(!video.snippet.defaultLanguage)throw Error('set_video_default_language');
-    const missing=TITLES.filter(l=>!video.localizations?.[l]?.title);
+    const missing=TITLES.filter(l=>!video.localizations?.[l]?.title && !(l==='iw'&&video.localizations?.he?.title));
     if(missing.length) {
       const sourceKey=JSON.stringify([video.snippet.defaultLanguage,video.snippet.title]);
       if(job.titleSource!==sourceKey) {
@@ -131,7 +131,7 @@ async function tick(env) {
       }
       const fresh=(await request(env,access,'videos',{part:'localizations',id:job.id},'GET',undefined,'application/json',1,ledger)).items?.[0];
       if(!fresh)throw Error('video_not_found');
-      const updates=Object.fromEntries(Object.entries(job.titleDraft).filter(([lang])=>!fresh.localizations?.[lang]?.title));
+      const updates=Object.fromEntries(Object.entries(job.titleDraft).filter(([lang])=>TITLES.includes(lang)&&!fresh.localizations?.[lang]?.title&&!(lang==='iw'&&fresh.localizations?.he?.title)));
       if(Object.keys(updates).length)await request(env,access,'videos',{part:'localizations'},'PUT',{id:job.id,localizations:mergeTitles(fresh.localizations||{},updates)},'application/json',50,ledger);
       delete job.titleSource;delete job.titleDraft;
       job.status='titles';
