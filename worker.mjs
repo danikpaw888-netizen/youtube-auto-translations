@@ -141,6 +141,7 @@ async function tick(env) {
     const tracks=(await request(env,access,'captions',{part:'snippet',videoId:job.id},'GET',undefined,'application/json',50,ledger)).items||[];
     const complete=new Set(tracks.filter(x=>!x.snippet.isDraft&&x.snippet.status==='serving').map(x=>x.snippet.language));
     const existing=new Set(tracks.map(x=>x.snippet.language));
+    job.captionSnapshot={checkedAt:new Date().toISOString(),presentLanguages:[...existing],servingLanguages:[...complete]};
     const source=tracks.find(x=>x.snippet.language==='ru'&&!x.snippet.isDraft&&x.snippet.status==='serving');
     const missingCaptions=BASE.filter(l=>!existing.has(l));
     if(missingCaptions.length&&!source)throw Error('waiting_for_russian_captions');
