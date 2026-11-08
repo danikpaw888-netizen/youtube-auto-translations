@@ -1,9 +1,9 @@
 // Disabled until Google OAuth secrets and ENABLED=true are configured.
 const BASE = ['az','sq','en','ar','hy','be','bg','hu','vi','el','ka','iw','id','es','it','kk','ky','ko','de','nl','pl','pt','th','tr','tk','uz','uk','fr','hi','ja'];
 const REGIONS = {en:['AU','GB','IN','IE','CA','US'],es:['ES','419','MX','US'],de:['AT','DE','CH'],nl:['BE','NL'],pt:['BR','PT'],fr:['BE','CA','FR','CH']};
-// Hindi is an existing extra in the user's videos; the reference has 29 base
-// languages + 21 regional variants = 50. Captions use 30 base languages.
-const TITLES = BASE.filter(x=>x!=='hi').concat(Object.entries(REGIONS).flatMap(([l,rs])=>rs.map(r=>`${l}-${r}`)));
+// 30 base languages plus 20 regional variants = 50 title localizations.
+// Captions use the 30 base languages.
+const TITLES = BASE.concat(Object.entries(REGIONS).flatMap(([l,rs])=>rs.map(r=>`${l}-${r}`)));
 const API='https://www.googleapis.com/youtube/v3/';
 function mergeTitles(existing, additions) {
   const out={...existing};
